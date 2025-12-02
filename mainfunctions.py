@@ -8,6 +8,7 @@
 import requests
 import json
 import nyt_key
+import tmdb_key
 
 def get_tmdb_movies(pages=5, output_file="movie.json"):
     """
