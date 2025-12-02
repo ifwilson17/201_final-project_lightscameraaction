@@ -12,13 +12,6 @@ import tmdb_key
 import omdb_key 
 
 def get_tmdb_movies(pages=5, output_file="movie.json"):
-    """
-    Fetches popular movies from TMDB, gets detailed info for each movie,
-    and saves the results to a JSON file.
-
-    Returns: list of movie dictionaries
-    """
-
     movies = []
 
     for page in range(1, pages + 1):
@@ -64,10 +57,6 @@ def get_tmdb_movies(pages=5, output_file="movie.json"):
     return movies
 
 def get_omdb_ratings(imdb_ids, output_file="omdb_movies.json"):
-    """
-    Takes a list of IMDb IDs, fetches detailed OMDb info for each movie,
-    saves the results to a JSON file, and returns the movie list.
-    """
 
     movies = []
     base_url = "http://www.omdbapi.com/"
