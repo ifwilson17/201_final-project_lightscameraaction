@@ -12,13 +12,6 @@ import tmdb_key
 import omdb_key 
 
 def get_tmdb_movies(pages=5, output_file="movie.json"):
-    """
-    Fetches popular movies from TMDB, gets detailed info for each movie,
-    and saves the results to a JSON file.
-
-    Returns: list of movie dictionaries
-    """
-
     movies = []
 
     for page in range(1, pages + 1):
@@ -26,7 +19,7 @@ def get_tmdb_movies(pages=5, output_file="movie.json"):
         # Endpoint for popular movies
         url = "https://api.themoviedb.org/3/movie/popular"
         params = {
-            "api_key": api_key.api_key,
+            "api_key": tmdb_key.api_key,
             "language": "en-US",
             "page": page
         }
@@ -41,7 +34,7 @@ def get_tmdb_movies(pages=5, output_file="movie.json"):
             # Fetch detailed info
             detail_url = f"https://api.themoviedb.org/3/movie/{tmdb_id}"
             detail_params = {
-                "api_key": api_key.api_key,
+                "api_key": omdb_key.api_key,
                 "language": "en-US"
             }
 
@@ -64,10 +57,6 @@ def get_tmdb_movies(pages=5, output_file="movie.json"):
     return movies
 
 def get_omdb_ratings(imdb_ids, output_file="omdb_movies.json"):
-    """
-    Takes a list of IMDb IDs, fetches detailed OMDb info for each movie,
-    saves the results to a JSON file, and returns the movie list.
-    """
 
     movies = []
     base_url = "http://www.omdbapi.com/"
@@ -75,7 +64,7 @@ def get_omdb_ratings(imdb_ids, output_file="omdb_movies.json"):
     for imdb_id in imdb_ids:
 
         params = {
-            "apikey": api_key.api_key,
+            "apikey": omdb_key.api_key,
             "i": imdb_id
         }
 
