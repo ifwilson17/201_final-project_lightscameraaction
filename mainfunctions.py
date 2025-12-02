@@ -97,59 +97,49 @@ def get_omdb_ratings(imdb_ids, output_file="omdb_movies.json"):
     return movies
 
 
-def get_nyt_movie_articles(movie_title):
+
+def get_nyt_movie_articles():
     url = "https://api.nytimes.com/svc/search/v2/articlesearch.json"
-    
-    params = {
-        "q": movie_title, 
-        "api-key": my_key.API_KEY,
+    results = [] 
 
-    }
-
-    headers = {
-        "User-Agent": "SI201-finalproject", 
-        "Accept": "application/json"
-    }
-
-    response = requests.get(url, params=params, headers=headers)
-    print("STATUS", response.status_code)
-
-    if response.status_code != 200: 
-        print("Request failed")
-        return []
-    
-    data = response.json()
-    docs = data.get("response", {}).get("docs", [])
-
-    if not docs:
-        print("No articles found for:", movie_title)
-        return []
-
-    results = []
-
-    for d in docs[:1]: 
-        article = {
-            "movie_title": movie_title, 
-            "headline": d.get("headline", {}).get("main", "No headline"),
-            "summary": d.get("abstract", "No summary"), 
-            "section": d.get("section_name"), 
-            "byline": d.get("byline", {}).get("original"),
-            "date": d.get("pub_date")
+    for page in range(0, 100): 
+        params = {
+            "q": "movie OR film OR review",
+            "fq": 'desk:("Culture","Arts") OR section.name:("Movies")',
+            "api-key": nyt_key.API_KEY,
+            "page": page
         }
 
-        results.append(article)
+        response = requests.get(url, params=params)
+        data = response.json()
+    
+
+        docs = data.get("response", {}).get("docs", [])
+        print("Page", page, "docs returned:", len(docs))
+
+        if not docs:
+            continue
+
+        for d in docs: 
+            results.append({
+                "headline": d.get("headline", {}).get("main", "No headline"),
+                "summary": d.get("abstract", "No summary"), 
+                "section": d.get("section_name"), 
+                "byline": d.get("byline", {}).get("original"),
+                "date": d.get("pub_date")
+            })
+            if len(results) >= 100: 
+                return results[:100]
+        
+    return results[:100]
 
 
+if __name__ == "__main__":
+    articles = get_nyt_movie_articles()
+    print(f"Saved {len(articles)} articles to articles.json")
     with open("articles.json", "w", encoding="utf-8") as f:
-        json.dump(results, f, indent=4)
-    print(f"Saved {len(article)} articles to articles.json")
+        json.dump(articles, f, indent=4)
 
-    return results 
-
-
-# if __name__ == "__main__":
-#     print(get_nyt_movie_articles("Shrek"))
-#     print(get_nyt_movie_articles("Barbie"))
 
 
 
