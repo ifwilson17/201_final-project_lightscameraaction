@@ -56,6 +56,8 @@ def get_tmdb_movies(pages=5, output_file="movie.json"):
     print(f"Saved {len(movies)} movies to {output_file}")
     return movies
 
+
+
 def get_omdb_ratings(imdb_ids, output_file="omdb_movies.json"):
 
     movies = []
