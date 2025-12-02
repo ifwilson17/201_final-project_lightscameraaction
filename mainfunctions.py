@@ -9,6 +9,7 @@ import requests
 import json
 import nyt_key
 import tmdb_key
+import omdb_key 
 
 def get_tmdb_movies(pages=5, output_file="movie.json"):
     """
@@ -54,6 +55,39 @@ def get_tmdb_movies(pages=5, output_file="movie.json"):
                 "imdb_id": detail_data.get("imdb_id"),
                 "budget": detail_data.get("budget")
             })
+
+    # Save to file
+    with open(output_file, "w") as f:
+        json.dump(movies, f, indent=4)
+
+    print(f"Saved {len(movies)} movies to {output_file}")
+    return movies
+
+def get_omdb_ratings(imdb_ids, output_file="omdb_movies.json"):
+    """
+    Takes a list of IMDb IDs, fetches detailed OMDb info for each movie,
+    saves the results to a JSON file, and returns the movie list.
+    """
+
+    movies = []
+    base_url = "http://www.omdbapi.com/"
+
+    for imdb_id in imdb_ids:
+
+        params = {
+            "apikey": api_key.api_key,
+            "i": imdb_id
+        }
+
+        detail = requests.get(base_url, params=params).json()
+
+        # Store only fields we need
+        movies.append({
+            "title": detail.get("Title"),
+            "imdb_id": imdb_id,
+            "genre": detail.get("Genre"),
+            "imdb_rating": detail.get("imdbRating")
+        })
 
     # Save to file
     with open(output_file, "w") as f:
