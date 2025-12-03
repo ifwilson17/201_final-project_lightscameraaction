@@ -7,9 +7,9 @@
 # Asked Chatgpt hints for debugging and suggesting the general sturcture of the code
 import requests
 import json
-import nyt_key
-import tmdb_key
-import omdb_key 
+from API_keys import nyt_key
+from API_keys import tmdb_key
+from API_keys import omdb_key 
 
 def get_tmdb_movies(pages=5, output_file="movie.json"):
     movies = []
@@ -34,7 +34,7 @@ def get_tmdb_movies(pages=5, output_file="movie.json"):
             # Fetch detailed info
             detail_url = f"https://api.themoviedb.org/3/movie/{tmdb_id}"
             detail_params = {
-                "api_key": omdb_key.api_key,
+                "api_key": tmdb_key.api_key,
                 "language": "en-US"
             }
 
@@ -53,7 +53,6 @@ def get_tmdb_movies(pages=5, output_file="movie.json"):
     with open(output_file, "w") as f:
         json.dump(movies, f, indent=4)
 
-    print(f"Saved {len(movies)} movies to {output_file}")
     return movies
 
 
@@ -83,8 +82,7 @@ def get_omdb_ratings(imdb_ids, output_file="omdb_movies.json"):
     # Save to file
     with open(output_file, "w") as f:
         json.dump(movies, f, indent=4)
-
-    print(f"Saved {len(movies)} movies to {output_file}")
+    
     return movies
 
 
@@ -125,11 +123,20 @@ def get_nyt_movie_articles():
     return results[:100]
 
 
+def main():
+    tmdb_movies = get_tmdb_movies()
+    imdb_ids = [m["imdb_id"] for m in tmdb_movies if m.get("imdb_id")]
+    omdb_movies = get_omdb_ratings(imdb_ids)
+    nyt_articles = get_nyt_movie_articles()
+
+    print("TMDB movies collected:", len(tmdb_movies))
+    print("OMDb movies collected:", len(omdb_movies))
+    print("NYT articles collected:", len(nyt_articles))
+
+
 if __name__ == "__main__":
-    articles = get_nyt_movie_articles()
-    print(f"Saved {len(articles)} articles to articles.json")
-    with open("articles.json", "w", encoding="utf-8") as f:
-        json.dump(articles, f, indent=4)
+    main()
+
 
 
 

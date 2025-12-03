@@ -1,6 +1,27 @@
 import sqlite3
 import matplotlib.pyplot as plt
 
+def create_tmdb_table():
+    # Connect to the SQLite database (creates the file if it doesn't exist)
+    conn = sqlite3.connect("movies.db")
+    cur = conn.cursor()
+
+    # Create the TMDB table if it does not already exist
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS tmdb_movies (
+            tmdb_id INTEGER PRIMARY KEY,
+            title TEXT,
+            imdb_id TEXT,
+            budget INTEGER
+        );
+    """)
+
+    # Save changes and close connection
+    conn.commit()
+    conn.close()
+
+
+
 def plot_mentions_vs_budget(db):
     conn = sqlite3.connect(db)
     cur = conn.cursor()
@@ -40,5 +61,8 @@ def plot_mentions_vs_budget(db):
     plt.savefig("NYT_Mention_vs_Budget.png")
     plt.show()
 
+def main():
+    create_tmdb_table()
 if __name__ == "__main__":
+    main()
     plot_mentions_vs_budget(".db")
