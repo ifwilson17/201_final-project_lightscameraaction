@@ -22,6 +22,23 @@ def set_up_database(db=DB):
     cur = conn.cursor()
     return cur, conn
 
+def create_tmdb_table(cur, conn):
+    # Connect to the SQLite database (creates the file if it doesn't exist)
+    conn = sqlite3.connect("movies.db")
+    cur = conn.cursor()
+
+    # Create the TMDB table if it does not already exist
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS tmdb_movies (
+            tmdb_id INTEGER PRIMARY KEY,
+            title TEXT,
+            imdb_id TEXT,
+            budget INTEGER
+        );
+    """)
+
+    conn.commit()
+    conn.close()
 
 def nyt_table(cur, conn): 
     cur.execute("""
@@ -199,14 +216,16 @@ def insert_nyt(cur, conn, articles, max_insert=25):
 
 def main():
     cur, conn = set_up_database()
+    tmdb_movies = get_tmdb_movies()
+    print("TMDB movies collected:", len(tmdb_movies))
+    create_tmdb_table(cur, conn)
     nyt_table(cur, conn)
 
     cur.execute("SELECT COUNT(*) FROM nyt_articles")
     current = cur.fetchone()[0]
     target = 100
     print(f"[NYT] Currently {current} rows in nyt_articles.")
-    # tmdb_movies = get_tmdb_movies()
-    # print("TMDB movies collected:", len(tmdb_movies))
+
 
     if current >= target: 
         conn.close()
