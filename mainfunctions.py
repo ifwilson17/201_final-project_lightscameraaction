@@ -14,6 +14,7 @@ from API_keys import tmdb_key
 from API_keys import omdb_key 
 
 DB = "functions.db"
+CACHE_FILE = "nyt_cache.json"
 
 def set_up_database(db=DB): 
     path = os.path.dirname(os.path.abspath(__file__))
@@ -49,8 +50,7 @@ def nyt_table(cur, conn):
             summary TEXT,
             section TEXT, 
             byline TEXT, 
-            date TEXT,
-            UNIQUE(headline, date)
+            date TEXT
         )     
     """)
     conn.commit()
@@ -130,34 +130,46 @@ def get_omdb_ratings(imdb_ids, output_file="omdb_movies.json"):
     
     return movies
 
+def save_cache_nyt(new_results): 
+    if os.path.exists(CACHE_FILE): 
+        with open(CACHE_FILE, "r") as f: 
+            cached = json.load(f)
+    else: 
+        cached = [] 
+    
+    combined = { (a["headline"], a["date"]): a for a in cached + new_results }
+    with open(CACHE_FILE, "w") as f:
+        json.dump(list(combined.values()), f, indent=4)
 
 
-def get_nyt_movie_articles(max_results):
+def get_nyt_movie_articles(max_results=200, use_cache=False):
+    results = []
+
+    if use_cache and os.path.exists(CACHE_FILE): 
+        with open(CACHE_FILE, "r") as f: 
+            cached = json.load(f)
+        return cached
+
+    needed = max_results - len(results)
+    if needed <= 0: 
+        return results[:max_results]
+
     url = "https://api.nytimes.com/svc/search/v2/articlesearch.json"
-    results = [] 
-    page = 0
+    page = len(results) // 10
 
     while len(results) < max_results and page < 10:  
         params = {
-            "q": "movie",
+            "q": "movie OR film OR cinema OR entertainment",
             "api-key": nyt_key.api_key,
             "page": page
         }
 
         response = requests.get(url, params=params)
-        if response.status_code != 200:
-            print("NYT request failed:", response.text[:250]) 
-            break 
-
         data = response.json()
         if "fault" in data: 
             break
 
         docs = data.get("response", {}).get("docs") or []
-        print(f"Page {page} returned {len(docs)} docs")
-        if not docs:
-            break
-
         for d in docs: 
             headline = d.get("headline", {}).get("main", "No headline")
             summary = (
@@ -172,7 +184,7 @@ def get_nyt_movie_articles(max_results):
                 if kw.get("name") == "subject": 
                     movie_title = kw.get("value")
                     break
-            if not movie_title: 
+            if not movie_title:         
                 movie_title = headline.split(":")[0]
 
             article = {
@@ -188,7 +200,7 @@ def get_nyt_movie_articles(max_results):
                 break 
         
         page += 1
-        
+    save_cache_nyt(results)
     return results[:max_results]
 
 def insert_nyt(cur, conn, articles, max_insert=25): 
@@ -234,10 +246,14 @@ def main():
     needed = target - current 
     max_ran = min(25, needed)
 
-    articles = get_nyt_movie_articles(max_ran)
+    articles = get_nyt_movie_articles()
+
+    start = current 
+    end = start + max_ran 
+    batch = articles[start:end]
     
-    if articles: 
-        insert_nyt(cur, conn, articles, max_insert=max_ran)
+    if batch: 
+        insert_nyt(cur, conn, batch, max_insert=max_ran)
         cur.execute("SELECT COUNT(*) FROM nyt_articles")
         new_count = cur.fetchone()[0]
         print(f"[NYT] Now {new_count} rows in nyt_articles.")
