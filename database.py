@@ -1,11 +1,5 @@
 import sqlite3
 
-from mainfunctions import (
-    get_tmdb_movies,
-    get_omdb_ratings,
-    get_nyt_movie_articles
-)
-
 def create_tmdb_tables():
     conn = sqlite3.connect("movies.db")
     cur = conn.cursor()
@@ -181,7 +175,7 @@ def save_omdb_to_db(movies):
 
 
 def main():
-    from mainfunctions import get_tmdb_movies, get_omdb_ratings  
+    from mainfunctions import get_tmdb_movies, get_omdb_ratings, get_nyt_movie_articles 
 
     create_tmdb_tables()
     create_omdb_tables()
