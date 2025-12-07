@@ -1,5 +1,10 @@
 import sqlite3
 
+from mainfunctions import (
+    get_tmdb_movies,
+    get_omdb_ratings,
+    get_nyt_movie_articles
+)
 
 def create_tmdb_tables():
     conn = sqlite3.connect("movies.db")
@@ -104,26 +109,25 @@ def save_articles_by_genre_to_db(articles):
 
     for article in articles: 
         try: 
-            genre = article.get("genre")
-            if not genre: 
-                genre = "N/A"
-
-            headline = article.get("headline", "No Title")
-            pub_date = article.get("pub_date", "Unknown")
-            url = article.get("url", "N/A")
-
             before = conn.total_changes
             cur.execute("""
                 INSERT OR IGNORE INTO nyt_articles 
-                (genre, headline, pub_date, url)
-                VALUES (?, ?, ?, ?)
-            """, (genre, headline, pub_date, url))
+                (genre, headline, summary, section, byline, date)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """, (
+                article.get("genre", "N/A"),
+                article.get("headline", "No Title"), 
+                article.get("summary", "No Summary"), 
+                article.get("section", "Unknown"),
+                article.get("byline", "Unknown"),
+                article.get("pub_date", "Unknown")
+            ))
             after = conn.total_changes
 
             if after > before: 
                 count_added += 1
             
-            if count_added >= 24:
+            if count_added >= 25:
                 break 
 
 
