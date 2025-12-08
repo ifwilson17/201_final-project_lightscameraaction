@@ -598,5 +598,125 @@
         "tmdb_id": 1214140,
         "imdb_id": "tt29262075",
         "budget": 0
+    },
+    {
+        "title": "EKS",
+        "tmdb_id": 1241742,
+        "imdb_id": "tt31262680",
+        "budget": 0
+    },
+    {
+        "title": "Wake Up Dead Man: A Knives Out Mystery",
+        "tmdb_id": 812583,
+        "imdb_id": "tt14364480",
+        "budget": 210000000
+    },
+    {
+        "title": "Predator",
+        "tmdb_id": 106,
+        "imdb_id": "tt0093773",
+        "budget": 15000000
+    },
+    {
+        "title": "Dhurandhar",
+        "tmdb_id": 1291608,
+        "imdb_id": "tt33014583",
+        "budget": 0
+    },
+    {
+        "title": "Nuremberg",
+        "tmdb_id": 1214931,
+        "imdb_id": "tt29567915",
+        "budget": 11800000
+    },
+    {
+        "title": "A Minecraft Movie",
+        "tmdb_id": 950387,
+        "imdb_id": "tt3566834",
+        "budget": 150000000
+    },
+    {
+        "title": "Furious 7",
+        "tmdb_id": 168259,
+        "imdb_id": "tt2820852",
+        "budget": 190000000
+    },
+    {
+        "title": "It",
+        "tmdb_id": 346364,
+        "imdb_id": "tt1396484",
+        "budget": 35000000
+    },
+    {
+        "title": "Holy Night: Demon Hunters",
+        "tmdb_id": 793387,
+        "imdb_id": "tt15766876",
+        "budget": 0
+    },
+    {
+        "title": "The Strangers: Chapter 2",
+        "tmdb_id": 1010756,
+        "imdb_id": "tt28671344",
+        "budget": 8000000
+    },
+    {
+        "title": "Home Alone 2: Lost in New York",
+        "tmdb_id": 772,
+        "imdb_id": "tt0104431",
+        "budget": 18000000
+    },
+    {
+        "title": "Lilo & Stitch",
+        "tmdb_id": 552524,
+        "imdb_id": "tt11655566",
+        "budget": 100000000
+    },
+    {
+        "title": "Other special desires",
+        "tmdb_id": 748881,
+        "imdb_id": "tt0080693",
+        "budget": 0
+    },
+    {
+        "title": "The Family McMullen",
+        "tmdb_id": 1548017,
+        "imdb_id": "tt35495052",
+        "budget": 0
+    },
+    {
+        "title": "Elio",
+        "tmdb_id": 1022787,
+        "imdb_id": "tt4900148",
+        "budget": 150000000
+    },
+    {
+        "title": "Titanic",
+        "tmdb_id": 597,
+        "imdb_id": "tt0120338",
+        "budget": 200000000
+    },
+    {
+        "title": "Your Name.",
+        "tmdb_id": 372058,
+        "imdb_id": "tt5311514",
+        "budget": 0
+    },
+    {
+        "title": "Moana 2",
+        "tmdb_id": 1241982,
+        "imdb_id": "tt13622970",
+        "budget": 150000000
+    },
+    {
+        "title": "Stolen Girl",
+        "tmdb_id": 1280450,
+        "imdb_id": "tt4682810",
+        "budget": 26000000
+    },
+    {
+        "title": "Primitive War",
+        "tmdb_id": 1257009,
+        "imdb_id": "tt18312380",
+        "budget": 0
     }
 ]
