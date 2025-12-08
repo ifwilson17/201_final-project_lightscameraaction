@@ -8,7 +8,6 @@
 import os
 import json
 import requests
-import sqlite3
 from API_keys import nyt_key
 from API_keys import tmdb_key
 from API_keys import omdb_key 
