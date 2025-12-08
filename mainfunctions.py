@@ -88,7 +88,10 @@ def get_omdb_ratings(imdb_ids, output_file="omdb_movies.json"):
     return movies
 
 
-def get_nyt_movie_articles(genres, pages=10, output_file="nyt_articles.json"):
+def get_nyt_movie_articles(genres=None, pages=10, output_file="nyt_articles.json"):
+    if genres is None: 
+        genres = ["movies"]
+
     articles = []
     for genre in genres: 
        for page in range(0, pages): 
@@ -130,7 +133,7 @@ def main():
     omdb_movies = get_omdb_ratings(imdb_ids)
     print("OMDB movies collected:", len(omdb_movies))
 
-    nyt_articles = get_nyt_movie_articles(genres=["movies"], pages=6)
+    nyt_articles = get_nyt_movie_articles()
     print("NYT articles collected:", len(nyt_articles))
 
 
