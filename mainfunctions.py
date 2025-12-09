@@ -1,4 +1,4 @@
-# SI 201 HW4
+# SI 201 Final Project
 # Your names: Isa Wilson, Amani, Rahma
 # Your emails: ifwilson@umich.edu, aaggour@umich.edu, rmusse@umich.edu
 # Who or what you worked with on this homework (including generative AI like ChatGPT): ChatGPT
@@ -124,16 +124,16 @@ def get_nyt_movie_articles(genres=None, pages=10, output_file="nyt_articles.json
 
 
 def main():
-    # # 1. Fetch TMDB movies
-    # tmdb_movies = get_tmdb_movies(pages=6)
-    # print("TMDB movies collected:", len(tmdb_movies))
+    # 1. Fetch TMDB movies
+    tmdb_movies = get_tmdb_movies(pages=6)
+    print("TMDB movies collected:", len(tmdb_movies))
 
-    # # 2. Extract IMDb IDs from TMDB movies
-    # imdb_ids = [m["imdb_id"] for m in tmdb_movies if m.get("imdb_id")]
+    # 2. Extract IMDb IDs from TMDB movies
+    imdb_ids = [m["imdb_id"] for m in tmdb_movies if m.get("imdb_id")]
 
-    # # 3. Fetch OMDB ratings using the IMDb IDs
-    # omdb_movies = get_omdb_ratings(imdb_ids)
-    # print("OMDB movies collected:", len(omdb_movies))
+    # 3. Fetch OMDB ratings using the IMDb IDs
+    omdb_movies = get_omdb_ratings(imdb_ids)
+    print("OMDB movies collected:", len(omdb_movies))
 
     nyt_articles = get_nyt_movie_articles()
     print("NYT articles collected:", len(nyt_articles))

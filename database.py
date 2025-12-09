@@ -1,73 +1,48 @@
 import sqlite3
+import json
 
-def create_tmdb_tables():
-    conn = sqlite3.connect("movies.db")
+# Create database tables
+def init_db(db_name="movies.db"):
+    conn = sqlite3.connect(db_name)
     cur = conn.cursor()
 
+    # IMDb keys table
     cur.execute("""
-        CREATE TABLE IF NOT EXISTS tmdb_movies (
-            tmdb_id INTEGER PRIMARY KEY,
-            title TEXT,
-            imdb_id TEXT,
-            budget INTEGER
-        );
-    """)
-
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS tmdb_links (
+        CREATE TABLE IF NOT EXISTS imdb_keys (
             imdb_id TEXT PRIMARY KEY
         );
     """)
 
-    conn.commit()
-    conn.close()
+    # Unique titles table
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS movie_titles (
+            title_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT UNIQUE
+        );
+    """)
 
+    # TMDB table
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS tmdb_movies (
+            tmdb_id INTEGER PRIMARY KEY,
+            imdb_id TEXT,
+            title_id INTEGER,
+            budget INTEGER,
+            FOREIGN KEY (imdb_id) REFERENCES imdb_keys(imdb_id),
+            FOREIGN KEY (title_id) REFERENCES movie_titles(title_id)
+        );
+    """)
 
-
-def save_tmdb_to_db(movies):
-    conn = sqlite3.connect("movies.db")
-    cur = conn.cursor()
-
-    count_added = 0
-
-    for movie in movies:
-        try:
-            imdb_id = movie.get("imdb_id")
-            if not imdb_id:
-                imdb_id = "N/A"   # beginner style fix
-
-            before = conn.total_changes
-            cur.execute("""
-                INSERT OR IGNORE INTO tmdb_movies (tmdb_id, title, imdb_id, budget)
-                VALUES (?, ?, ?, ?)
-            """, (movie.get("tmdb_id"), movie.get("title"), imdb_id, movie.get("budget")))
-            after = conn.total_changes
-
-            if after > before:
-                count_added += 1
-
-            if count_added >= 25:
-                break
-
-        except Exception as e:
-            print("Error saving TMDB movie:", e)
-
-    conn.commit()
-    conn.close()
-    print("TMDB: Added", count_added, "movies.")
-
-
-
-def create_omdb_tables():
-    conn = sqlite3.connect("movies.db")
-    cur = conn.cursor()
-
+    # OMDB table
     cur.execute("""
         CREATE TABLE IF NOT EXISTS omdb_movies (
-            imdb_id TEXT PRIMARY KEY,
-            title TEXT,
+            omdb_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            imdb_id TEXT,
+            title_id INTEGER,
             genre TEXT,
-            imdb_rating REAL
+            imdb_rating REAL,
+            FOREIGN KEY (imdb_id) REFERENCES imdb_keys(imdb_id),
+            FOREIGN KEY (title_id) REFERENCES movie_titles(title_id)
         );
     """)
 
@@ -75,125 +50,98 @@ def create_omdb_tables():
     conn.close()
 
 
+# Insert helpers
 
-def create_nyt_table(): 
-    conn = sqlite3.connect("movies.db")
+def insert_imdb_key(conn, imdb_id):
     cur = conn.cursor()
+    cur.execute("INSERT OR IGNORE INTO imdb_keys (imdb_id) VALUES (?);", (imdb_id,))
+    conn.commit()
 
+
+def insert_title(conn, title):
+    cur = conn.cursor()
+    if title:
+        title = title.strip().lower()
+    else:
+        title = "unknown title"
+    cur.execute("INSERT OR IGNORE INTO movie_titles (title) VALUES (?);", (title,))
+    conn.commit()
+
+    cur.execute("SELECT title_id FROM movie_titles WHERE title = ?;", (title,))
+    return cur.fetchone()[0]
+
+
+# Insert TMDB row
+
+def insert_tmdb_row(conn, movie):
+    imdb_id = movie["imdb_id"]
+    title = movie["title"]
+
+    insert_imdb_key(conn, imdb_id)
+    title_id = insert_title(conn, title)
+
+    cur = conn.cursor()
     cur.execute("""
-        CREATE TABLE IF NOT EXISTS nyt_articles (
-            id INTEGER PRIMARY KEY AUTOINCREMENT, 
-            genre TEXT, 
-            headline TEXT, 
-            summary TEXT,
-            section TEXT, 
-            byline TEXT, 
-            date TEXT
-        )     
-    """)
+        INSERT OR REPLACE INTO tmdb_movies (tmdb_id, imdb_id, title_id, budget)
+        VALUES (?, ?, ?, ?);
+    """, (
+        movie["tmdb_id"],
+        imdb_id,
+        title_id,
+        movie["budget"]
+    ))
     conn.commit()
-    conn.close()
 
 
-def save_articles_by_genre_to_db(articles): 
-    conn = sqlite3.connect("movies.db")
+# Insert OMDB row
+
+def insert_omdb_row(conn, movie):
+    imdb_id = movie["imdb_id"]
+    title = movie["title"]
+
+    insert_imdb_key(conn, imdb_id)
+    title_id = insert_title(conn, title)
+
     cur = conn.cursor()
-
-    count_added = 0 
-
-    for article in articles: 
-        try: 
-            before = conn.total_changes
-            cur.execute("""
-                INSERT OR IGNORE INTO nyt_articles 
-                (genre, headline, summary, section, byline, date)
-                VALUES (?, ?, ?, ?, ?, ?)
-            """, (
-                article.get("genre", "N/A"),
-                article.get("headline", "No Title"), 
-                article.get("summary", "No Summary"), 
-                article.get("section", "Unknown"),
-                article.get("byline", "Unknown"),
-                article.get("pub_date", "Unknown")
-            ))
-            after = conn.total_changes
-
-            if after > before: 
-                count_added += 1
-            
-            if count_added >= 25:
-                break 
-
-
-        except Exception as e:
-            print("Error saving NYT articles:", e)
-
+    cur.execute("""
+        INSERT INTO omdb_movies (imdb_id, title_id, genre, imdb_rating)
+        VALUES (?, ?, ?, ?);
+    """, (
+        imdb_id,
+        title_id,
+        movie.get("genre"),
+        movie.get("imdb_rating")
+    ))
     conn.commit()
-    conn.close()
-    print("NYT: Added", count_added, "articles.")
 
 
-# --------------------------------------------------------
-# Save OMDB ratings (limit 25)
-# --------------------------------------------------------
-def save_omdb_to_db(movies):
-    conn = sqlite3.connect("movies.db")
-    cur = conn.cursor()
-
-    count_added = 0
-
-    for movie in movies:
-        try:
-            imdb_id = movie.get("imdb_id")
-            title = movie.get("title")
-            genre = movie.get("genre")
-            rating = movie.get("imdb_rating")
-
-            if not imdb_id or not title:
-                continue   # skip bad records
-
-            before = conn.total_changes
-            cur.execute("""
-                INSERT OR IGNORE INTO omdb_movies (imdb_id, title, genre, imdb_rating)
-                VALUES (?, ?, ?, ?)
-            """, (imdb_id, title, genre, rating))
-            after = conn.total_changes
-
-            if after > before:
-                count_added += 1
-
-            if count_added >= 25:
-                break
-
-        except Exception as e:
-            print("Error saving OMDB movie:", e)
-
-    conn.commit()
-    conn.close()
-    print("OMDB: Added", count_added, "movies.")
-
-
-
+# MAIN function for database.py
+# Reads JSON files and inserts them
 def main():
-    from mainfunctions import get_tmdb_movies, get_omdb_ratings, get_nyt_movie_articles 
+    init_db()
 
-    create_tmdb_tables()
-    create_omdb_tables()
-    create_nyt_table()
+    conn = sqlite3.connect("movies.db")
 
-    tmdb_movies = get_tmdb_movies()
-    save_tmdb_to_db(tmdb_movies)
+    # Load TMDB JSON
+    with open("movie.json", "r") as f:
+        tmdb_movies = json.load(f)
 
-    imdb_ids = [m.get("imdb_id") for m in tmdb_movies if m.get("imdb_id")]
-    omdb_movies = get_omdb_ratings(imdb_ids)
-    save_omdb_to_db(omdb_movies)
+    # Load OMDB JSON
+    with open("omdb_movies.json", "r") as f:
+        omdb_movies = json.load(f)
 
-    nyt_articles = get_nyt_movie_articles()
-    save_articles_by_genre_to_db(nyt_articles)
+    # Insert TMDB data
+    for movie in tmdb_movies:
+        insert_tmdb_row(conn, movie)
 
+    # Insert OMDB data
+    for movie in omdb_movies:
+        insert_omdb_row(conn, movie)
 
-    print("DONE.")
+    conn.close()
+    print("Database successfully populated.")
 
 
 if __name__ == "__main__":
     main()
+
