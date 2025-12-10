@@ -130,9 +130,9 @@ def main():
     with open("omdb_movies.json", "r") as f:
         omdb_movies = json.load(f)
 
-    # Limit to 25 items per execution
-    tmdb_movies = tmdb_movies[:25]
-    omdb_movies = omdb_movies[:25]
+    # # Limit to 25 items per execution
+    # tmdb_movies = tmdb_movies[:25]
+    # omdb_movies = omdb_movies[:25]
 
     # Insert TMDB data
     for movie in tmdb_movies:
