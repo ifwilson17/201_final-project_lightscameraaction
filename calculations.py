@@ -1,4 +1,5 @@
 import sqlite3
+import matplotlib.pyplot as plt
 
 # Find the movie with the highest budget AND the movie with the highest IMDb rating. 
 def calculation_1_budget_vs_rating(conn):
@@ -51,16 +52,43 @@ def calculation_1_budget_vs_rating(conn):
     highest_rating_row = max(cleaned_rows, key=lambda r: r[2])
 
     # Print results
-    print("\nHighest Budget Movie:")
+    print("Highest Budget Movie:")
     print(f"  Title ID: {highest_budget_row[0]}")
-    print(f"  Budget: ${highest_budget_row[1]:,}")
+    print(f"  Budget: ${highest_budget_row[1]}")
 
-    print("\nHighest Rated Movie:")
+    print("Highest Rated Movie:")
     print(f"  Title ID: {highest_rating_row[0]}")
     print(f"  IMDb Rating: {highest_rating_row[2]}")
 
-    print("\nDone with Calculation #1.\n")
+    # Visualization 1: scatterplot for budget and imdb rating
+    budgets = []
+    ratings = []
 
+    for row in cleaned_rows:
+        budgets.append(row[1])   
+        ratings.append(row[2])   
+
+    # Now draw the scatter plot
+    plt.figure(figsize=(8, 6))
+    plt.scatter(budgets, ratings)
+
+    plt.title("Budget vs IMDb Rating")
+    plt.xlabel("Budget (USD)")
+    plt.ylabel("IMDb Rating")
+    plt.show()
+
+    # Visualization 2: histogram showing rating distribution
+    ratings = []
+    for movie in cleaned_rows:
+        ratings.append(movie[2])  
+
+    # Step 2: Plot histogram
+    plt.figure(figsize=(10, 6))
+    plt.hist(ratings, bins=10, color='green', edgecolor='black')
+    plt.xlabel("IMDb Rating")
+    plt.ylabel("Number of Movies")
+    plt.title("IMDb Rating Distribution of Movies")
+    plt.show()
 
 
 # Calculate the average IMDb rating for each movie genre.
@@ -117,13 +145,40 @@ def calculation_2_avg_rating_by_genre(conn):
             genre_counts[genre] += 1
 
     # Print average rating for each genre
-    print("\nAverage IMDb Rating by Genre:")
+    print("Average IMDb Rating by Genre:")
     for genre in genre_totals:
         avg = genre_totals[genre] / genre_counts[genre]
         print(f"  {genre}: {avg:.2f}")
+    
+    # Visualization #1: bar chart for average imdb rating by genre 
+    genres_list = []
+    averages_list = []
 
-    print("\nDone with Calculation #2.\n")
+    for genre in genre_totals:
+        avg = genre_totals[genre] / genre_counts[genre]
+        genres_list.append(genre)
+        averages_list.append(avg)
 
+    plt.figure(figsize=(12, 6))
+    plt.bar(genres_list, averages_list)
+    plt.title("Average IMDb Rating by Genre")
+    plt.xlabel("Genre")
+    plt.ylabel("Average Rating")
+    plt.xticks(rotation=45)
+    plt.show()
+
+    # Visualization #2: pie chart of genre counts, how many movies per genre
+    genre_names = []
+    genre_sizes = []
+
+    for genre in genre_counts:
+        genre_names.append(genre)
+        genre_sizes.append(genre_counts[genre])
+
+    plt.figure(figsize=(10, 8))
+    plt.pie(genre_sizes, labels=genre_names, autopct="%1.1f%%")
+    plt.title("Genre Distribution in OMDb Movies")
+    plt.show()
 
 
 def main():
